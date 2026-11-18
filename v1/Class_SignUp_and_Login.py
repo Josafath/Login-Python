@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter.font import Font
 from tkinter import messagebox as mb
-import datetime
+from datetime import datetime
 
 class SignUp(tk.Frame):
     def __init__(self, master):
@@ -41,7 +41,8 @@ class SignUp(tk.Frame):
             # Let's split every single line to be able to sort the data
             # We gonna have something like: [[user_name, email, password],[user_name, email, password]...]
 
-            users = [line.split() for line in extract_data]
+            # Skip blank lines (every new user is written after a "\n")
+            users = [line.split() for line in extract_data if line.strip()]
             if not len(users) < 2:
                 self.sort(users)
                 users_sorted = open("Users.txt", 'w')
@@ -65,7 +66,8 @@ class SignUp(tk.Frame):
             i = j = k = 0
 
             while i < len(L) and j < len(R):
-                if ord(L[i][0][0]) < ord(R[j][0][0]):
+                # Compare the whole user name so binary search can find exact names
+                if L[i][0] <= R[j][0]:
                     array[k] = L[i]
                     i += 1
 
@@ -77,7 +79,7 @@ class SignUp(tk.Frame):
             while i < len(L):
                 array[k] = L[i]
                 i += 1
-                j += 1
+                k += 1
 
             while j < len(R):
                 array[k] = R[j]
@@ -131,34 +133,37 @@ class LogIn(tk.Frame):
 
     def login(self):
         sign_in = open("Users.txt", 'r')
-        users = [line.split() for line in sign_in]
+        users = [line.split() for line in sign_in if line.strip()]
         self.search_user(users,len(users)-1,0,self.user_name.get().lower(), self.password.get().lower())
         self.clean_entries()
 
     def search_user(self, array, high, low, target, password):
-        try:
-            if high >= low:
-                mid = (high + low) // 2
-                # In case the program found the user then first set the user info and after update the date of the last login.
+        if high >= low:
+            mid = (high + low) // 2
+            # In case the program found the user then first set the user info and after update the date of the last login.
 
-                if ord(array[mid][0][0]) == ord(target[0]) and array[mid][2] == password:
+            if array[mid][0] == target:
+                if array[mid][2] == password:
                     self.user.set(f"Welcome back {array[mid][0].capitalize()}!")
                     self.info.set(f"Email: {array[mid][1]}")
                     self.fecha.set("Register Date:" + "\n" + f"{array[mid][-1]}")
-                    return
-
-                elif ord(array[mid][0][0]) > ord(target[0]):
-                    return self.search_user(array, low, mid - 1, target, password)
-
-                elif ord(array[mid][0][0]) < ord(target[0]):
-                    return self.search_user(array, mid + 1, high, target, password)
-
                 else:
-                    return 0
+                    self.show_error("Wrong password")
+                return
 
-        # In case the user insert a name out of the range of the current list of users.
-        except IndexError:
-            self.user.set("User NOT Found")
+            elif array[mid][0] > target:
+                return self.search_user(array, mid - 1, low, target, password)
+
+            else:
+                return self.search_user(array, high, mid + 1, target, password)
+
+        # The search ran out of users without finding the name.
+        self.show_error("User NOT Found")
+
+    def show_error(self, message):
+        self.user.set(message)
+        self.info.set("")
+        self.fecha.set("")
 
     def clean_entries(self):
         self.user_name.set("")
