@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "authlab"
+version = "2.0.0"
+description = "Sign up / log in app built on search and sort algorithms written from scratch."
+requires-python = ">=3.10"
+dependencies = []  # standard library only (Tkinter, hashlib)
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+authlab = "authlab.__main__:main"
+
+[tool.setuptools]
+packages = ["authlab", "authlab.algorithms"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

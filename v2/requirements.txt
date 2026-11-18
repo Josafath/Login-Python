@@ -1,0 +1,4 @@
+# The app only uses the Python standard library (Tkinter, hashlib).
+# Installing this file installs the app itself and adds the `authlab` command.
+# Run it from the v2/ folder:  pip install -r requirements.txt
+-e .
